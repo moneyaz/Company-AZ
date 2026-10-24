@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MONEY AZ - Plataforma de Investimentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .bg-dark-app { background-color: #0b132b; }
+        .bg-card-app { background-color: #16213e; }
+        .text-gold-app { color: #f4d35e; }
+        .bg-gold-app { background-color: #f4d35e; }
+    </style>
+</head>
+<body class="bg-dark-app text-gray-100 font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- ECRÃ DE AUTENTICAÇÃO -->
+    <div id="auth-screen" class="fixed inset-0 bg-dark-app z-50 flex items-center justify-center p-4">
+        <div class="bg-card-app border border-gray-800 rounded-3xl max-w-sm w-full p-6 space-y-6 shadow-2xl">
+            <div class="text-center space-y-2">
+                <div onclick="secretAdminTrigger()" class="inline-flex bg-gradient-to-r from-yellow-400 to-amber-600 text-gray-900 font-black px-4 py-2 rounded-2xl text-xl tracking-wider shadow cursor-pointer select-none">MAZ</div>
+                <h1 class="text-xl font-bold text-white">MONEY AZ</h1>
+                <p class="text-xs text-gray-400">Entre na sua conta ou faça o registo</p>
+            </div>
+
+            <!-- Abas Cadastro / Login -->
+            <div class="flex bg-dark-app p-1 rounded-xl border border-gray-800">
+                <button onclick="switchAuthTab('login')" id="btn-tab-login" class="flex-1 py-2 text-xs font-bold rounded-lg bg-yellow-500 text-gray-900 transition">Entrar</button>
+                <button onclick="switchAuthTab('register')" id="btn-tab-register" class="flex-1 py-2 text-xs font-bold rounded-lg text-gray-400 transition">Criar Conta</button>
+            </div>
+
+            <!-- Formulário de Login -->
+            <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Número de Telemóvel</label>
+                    <input type="tel" id="login-phone" required placeholder="9XXXXXXXX" maxlength="9" class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:border-yellow-500 outline-none mb-3">
+                    
+                    <label class="block text-xs text-gray-400 mb-1">Senha</label>
+                    <input type="password" id="login-pass" required placeholder="Sua senha" class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:border-yellow-500 outline-none">
+                </div>
+                <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-3 rounded-xl text-xs transition shadow-lg">Entrar na Plataforma</button>
+            </form>
+
+            <!-- Formulário de Registo -->
+            <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Nome Completo</label>
+                    <input type="text" id="reg-name" required placeholder="Seu nome completo" class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:border-yellow-500 outline-none mb-3">
+                    
+                    <label class="block text-xs text-gray-400 mb-1">Número de Telemóvel (Angola)</label>
+                    <input type="tel" id="reg-phone" required placeholder="9XXXXXXXX" maxlength="9" class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:border-yellow-500 outline-none mb-3">
+
+                    <label class="block text-xs text-gray-400 mb-1">Criar Senha</label>
+                    <input type="password" id="reg-pass" required placeholder="Escolha uma senha" class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:border-yellow-500 outline-none">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 rounded-xl text-xs transition shadow-lg">Cadastrar Conta</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- APLICAÇÃO PRINCIPAL -->
+    <div id="main-app" class="hidden flex flex-col justify-between min-h-screen pb-10">
+        <!-- Header -->
+        <header class="bg-card-app border-b border-gray-800 sticky top-0 z-40 px-4 py-3 shadow-md">
+            <div class="max-w-md mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div onclick="secretAdminTrigger()" class="bg-gradient-to-r from-yellow-400 to-amber-600 text-gray-900 font-black px-2.5 py-1.5 rounded-lg text-sm tracking-wider shadow cursor-pointer select-none">MAZ</div>
+                    <div>
+                        <h1 class="text-base font-bold tracking-wide text-white" id="user-welcome-name">MONEY AZ</h1>
+                        <p class="text-[10px] text-yellow-400 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i> Rendimento Diário 7.5%</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <a id="whatsapp-support-link" href="https://wa.me/244900000000" target="_blank" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-2 rounded-xl text-xs hover:bg-emerald-600/30 transition flex items-center space-x-1" title="Apoio ao Cliente">
+                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                        <span class="hidden sm:inline">Suporte</span>
+                    </a>
+                    <button onclick="logout()" class="bg-gray-800 border border-gray-700 text-red-400 px-3 py-2 rounded-xl text-xs hover:bg-gray-700 transition" title="Sair"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-md mx-auto px-4 py-4 space-y-4 w-full">
+
+            <!-- Abas de Navegação -->
+            <div class="grid grid-cols-2 gap-2 bg-card-app p-1.5 rounded-2xl border border-gray-800">
+                <button onclick="switchTab('invest')" id="tab-btn-invest" class="py-2 text-xs font-bold rounded-xl bg-yellow-500 text-gray-900 transition shadow">Investir / Pacotes</button>
+                <button onclick="switchTab('my-packages')" id="tab-btn-mypackages" class="py-2 text-xs font-bold rounded-xl text-gray-400 transition">Meus Pacotes</button>
+            </div>
+
+            <!-- CONTEÚDO: INVESTIR / PAINEL PRINCIPAL -->
+            <div id="view-invest" class="space-y-4">
+                <!-- Saldo na Carteira -->
+                <div class="bg-card-app border border-gray-800 p-4 rounded-2xl shadow-lg relative overflow-hidden">
+                    <button onclick="toggleBalanceVisibility()" class="absolute right-3 top-3 text-gray-400 hover:text-white text-base z-10" title="Ocultar/Mostrar Saldo">
+                        <i id="balance-eye-icon" class="fa-solid fa-eye"></i>
+                    </button>
+                    <span class="text-xs text-gray-400 uppercase tracking-wider block font-medium">Saldo na Carteira</span>
+                    <div class="text-3xl font-extrabold text-white my-1" id="user-balance-display">0 Kz</div>
+                    <span class="text-xs text-yellow-400 block"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Pendente: <span id="user-pending-display">0 Kz</span></span>
+                </div>
+
+                <!-- Ganhos por Indicação -->
+                <div class="bg-card-app border border-gray-800 p-4 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="absolute right-3 top-3 text-gray-700 text-3xl opacity-20"><i class="fa-solid fa-users"></i></div>
+                    <span class="text-xs text-gray-400 uppercase tracking-wider block font-medium">Ganhos por Indicação</span>
+                    <div class="text-2xl font-bold text-white my-1" id="user-referral-display">0 Kz</div>
+                    <span class="text-xs text-gray-400 block">Convidados ativos: <span class="text-white font-semibold">0 pessoas</span></span>
+                </div>
+
+                <!-- Ações de Saldo -->
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="openDepositModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-sm flex items-center justify-center space-x-2 transition shadow-lg"><i class="fa-solid fa-circle-plus"></i><span>Recarregar</span></button>
+                    <button onclick="openWithdrawModal()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white font-bold py-3 px-4 rounded-xl text-sm flex items-center justify-center space-x-2 transition shadow-lg"><i class="fa-solid fa-money-bill-transfer"></i><span>Levantar</span></button>
+                </div>
+
+                <!-- Convite VIP -->
+                <div class="bg-card-app border border-gray-800 p-4 rounded-2xl shadow-lg space-y-3">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-gift text-yellow-400 text-lg"></i>
+                        <h3 class="font-bold text-sm text-white">Convite VIP - MONEY AZ</h3>
+                    </div>
+                    <p class="text-xs text-gray-400">Ganhe 10% das recargas efetuadas pelos seus convidados!</p>
+                    <div class="flex items-center bg-dark-app border border-gray-700 rounded-xl p-2">
+                        <input type="text" id="referral-link" readonly value="https://edygutxi-star.github.io/?ref=user" class="bg-transparent text-xs text-gray-300 w-full outline-none px-1 truncate">
+                        <button onclick="copyRefLink()" class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold px-3 py-1.5 rounded-lg text-xs transition flex items-center space-x-1"><i class="fa-solid fa-copy"></i><span>Copiar</span></button>
+                    </div>
+                </div>
+
+                <!-- Secção de Pacotes -->
+                <div class="space-y-3 pt-2">
+                    <div class="flex justify-between items-center px-1">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-box-archive text-yellow-400"></i>
+                            <h2 class="font-bold text-sm text-white">Pacotes MONEY AZ (7.5% / Dia)</h2>
+                        </div>
+                        <span class="text-[10px] bg-gray-800 text-gray-300 border border-gray-700 px-2 py-1 rounded-lg">Stock Limitado</span>
+                    </div>
+                    <p class="text-xs text-gray-400 px-1">Selecione o plano desejado para comprar com o seu saldo disponível.</p>
+
+                    <div id="packages-list" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- CONTEÚDO: MEUS PACOTES -->
+            <div id="view-mypackages" class="space-y-4 hidden">
+                <div class="bg-card-app border border-gray-800 p-4 rounded-2xl shadow-lg space-y-3">
+                    <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-list-check text-yellow-400"></i>
+                        <span>Os Meus Pacotes Investidos</span>
+                    </h3>
+                    <p class="text-xs text-gray-400">Acompanhe o estado de aprovação e os rendimentos dos seus pacotes adquiridos.</p>
+                </div>
+
+                <div id="my-packages-container" class="space-y-3"></div>
+
+                <!-- HISTÓRICO RECENTE -->
+                <div class="bg-card-app border border-gray-800 p-4 rounded-2xl shadow-lg space-y-3 pt-3">
+                    <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+                        <i class="fa-solid fa-clock-rotate-left text-yellow-400"></i>
+                        <span>Histórico de Transações</span>
+                    </h3>
+                    <div id="user-history-container" class="space-y-2 text-xs"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE RECARGA -->
+    <div id="deposit-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-card-app border border-gray-700 rounded-2xl max-w-sm w-full p-5 space-y-4 relative">
+            <button onclick="closeDepositModal()" class="absolute right-4 top-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="font-bold text-white text-base"><i class="fa-solid fa-circle-plus text-emerald-500 mr-2"></i> Recarregar Saldo</h3>
+            <div class="bg-dark-app p-3 rounded-xl border border-gray-700 text-xs space-y-1 relative">
+                <p class="text-yellow-400 font-bold">Coordenadas Bancárias:</p>
+                <p>Banco: <span id="display-bank-name" class="text-white font-semibold">BAI</span></p>
+                <p>Titular: <span id="display-bank-owner" class="text-white font-semibold">Money Az Lda</span></p>
+                <p class="flex justify-between items-center pt-1">
+                    <span>IBAN: <b id="display-bank-iban" class="text-white select-all">AO06 0000 0000 0000 0000 0</b></span>
+                    <button onclick="copyIban()" class="text-yellow-400 hover:text-yellow-300 font-bold ml-2 text-[10px] border border-yellow-500/30 px-1.5 py-0.5 rounded"><i class="fa-solid fa-copy"></i> Copiar</button>
+                </p>
+            </div>
+            <form onsubmit="submitDeposit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[11px] text-gray-300 mb-1">Valor Transferido (Kz)</label>
+                    <input type="number" id="dep-amount" required min="1" placeholder="Ex: 10000" class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-yellow-500 mb-2">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-gray-300 mb-1">Comprovante de Transferência (Print)</label>
+                    <input type="file" id="dep-receipt" accept="image/*" required class="w-full text-xs text-gray-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs transition">Enviar Comprovante</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE LEVANTAMENTO -->
+    <div id="withdraw-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-card-app border border-gray-700 rounded-2xl max-w-sm w-full p-5 space-y-4 relative">
+            <button onclick="closeWithdrawModal()" class="absolute right-4 top-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="font-bold text-white text-base"><i class="fa-solid fa-money-bill-transfer text-yellow-400 mr-2"></i> Solicitar Levantamento</h3>
+            <form onsubmit="submitWithdraw(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[11px] text-gray-300 mb-1">Valor (Kz)</label>
+                    <input type="number" id="w-amount" required placeholder="0" class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-gray-300 mb-1">Seu IBAN Bancário</label>
+                    <input type="text" id="w-iban" required placeholder="AO06..." class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2 text-xs text-white">
+                </div>
+                <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-2.5 rounded-xl text-xs transition">Confirmar Levantamento</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ADM SECRETO EXPANDIDO COM CONFIGURAÇÕES EDITÁVEIS -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-card-app border border-gray-700 rounded-2xl max-w-sm w-full p-5 space-y-4 relative" id="admin-login-box">
+            <button onclick="closeAdminModal()" class="absolute right-4 top-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="font-bold text-white text-base"><i class="fa-solid fa-lock text-yellow-400 mr-2"></i> Painel Administrador</h3>
+            <p class="text-xs text-gray-400">Insira a senha de acesso:</p>
+            <input type="password" id="admin-pass" placeholder="Senha" class="w-full bg-dark-app border border-gray-700 rounded-xl px-3 py-2 text-xs text-white">
+            <button onclick="verifyAdmin()" class="w-full bg-yellow-500 text-gray-900 font-bold py-2.5 rounded-xl text-xs hover:bg-yellow-400 transition">Entrar</button>
+        </div>
+
+        <div id="admin-panel" class="bg-card-app border border-gray-700 rounded-2xl max-w-lg w-full p-5 space-y-4 hidden max-h-[85vh] overflow-y-auto relative">
+            <div class="flex justify-between items-center border-b border-gray-700 pb-3">
+                <h3 class="font-bold text-white text-sm"><i class="fa-solid fa-sliders text-yellow-400 mr-1.5"></i> Gestão Avançada ADM - MONEY AZ</h3>
+                <button onclick="closeAdminModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
+                <div class="bg-dark-app p-2 rounded-xl border border-gray-700">
+                    <span class="text-gray-400 block">Clientes</span>
+                    <b class="text-white text-xs" id="adm-stat-users">0</b>
+                </div>
+                <div class="bg-dark-app p-2 rounded-xl border border-gray-700">
+                    <span class="text-gray-400 block">Saldo Total</span>
+                    <b class="text-emerald-400 text-xs" id="adm-stat-totalbalance">0 Kz</b>
+                </div>
+                <div class="bg-dark-app p-2 rounded-xl border border-gray-700">
+                    <span class="text-gray-400 block">Pendentes</span>
+                    <b class="text-yellow-400 text-xs" id="adm-stat-pending">0</b>
+                </div>
+            </div>
+
+            <!-- NOVO: EDITAR DEFINIÇÕES BANCÁRIAS E WHATSAPP -->
+            <div class="space-y-2 pt-2 border-t border-gray-800">
+                <h4 class="text-xs font-bold text-yellow-400 uppercase flex items-center justify-between">
+                    <span>Editar Dados Bancários & Suporte</span>
+                    <i class="fa-solid fa-gears"></i>
+                </h4>
+                <form onsubmit="saveSystemSettings(event)" class="bg-dark-app p-3 rounded-xl border border-gray-700 space-y-2 text-xs">
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-0.5">Nome do Banco</label>
+                        <input type="text" id="cfg-bank" required class="w-full bg-card-app border border-gray-700 rounded-lg px-2 py-1 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-0.5">Titular da Conta</label>
+                        <input type="text" id="cfg-owner" required class="w-full bg-card-app border border-gray-700 rounded-lg px-2 py-1 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-0.5">IBAN Oficial</label>
+                        <input type="text" id="cfg-iban" required class="w-full bg-card-app border border-gray-700 rounded-lg px-2 py-1 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 mb-0.5">Número WhatsApp de Suporte (Com código de país, ex: 244900000000)</label>
+                        <input type="text" id="cfg-whatsapp" required class="w-full bg-card-app border border-gray-700 rounded-lg px-2 py-1 text-xs text-white">
+                    </div>
+                    <button type="submit" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-1.5 rounded-lg text-xs transition">Guardar Alterações</button>
+                </form>
+            </div>
+
+            <div class="space-y-3 pt-2">
+                <h4 class="text-xs font-bold text-yellow-400 uppercase flex items-center justify-between">
+                    <span>Aprovar Recargas Pendentes</span>
+                    <i class="fa-solid fa-circle-plus"></i>
+                </h4>
+                <div id="admin-orders-list" class="space-y-2 text-xs"></div>
+            </div>
+
+            <div class="space-y-3 pt-2">
+                <h4 class="text-xs font-bold text-yellow-400 uppercase flex items-center justify-between">
+                    <span>Gerir Pacotes Comprados</span>
+                    <i class="fa-solid fa-box-archive"></i>
+                </h4>
+                <div id="admin-packages-list" class="space-y-2 text-xs"></div>
+            </div>
+
+            <div class="space-y-3 pt-2">
+                <h4 class="text-xs font-bold text-yellow-400 uppercase flex items-center justify-between">
+                    <span>Solicitações de Saque</span>
+                    <i class="fa-solid fa-money-bill-transfer"></i>
+                </h4>
+                <div id="admin-withdraws-list" class="space-y-2 text-xs"></div>
+            </div>
+
+            <div class="space-y-3 pt-2 border-t border-gray-800">
+                <h4 class="text-xs font-bold text-yellow-400 uppercase flex items-center justify-between">
+                    <span>Editar Saldo de Utilizador</span>
+                    <i class="fa-solid fa-users-gear"></i>
+                </h4>
+                <div id="admin-users-list" class="space-y-2 text-xs max-h-40 overflow-y-auto pr-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE VISUALIZAÇÃO DE PRINT -->
+    <div id="receipt-view-modal" class="fixed inset-0 bg-black/90 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-card-app p-4 rounded-2xl max-w-sm w-full space-y-3 relative">
+            <button onclick="closeReceiptView()" class="absolute right-3 top-3 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h4 class="font-bold text-white text-xs">Comprovante Enviado</h4>
+            <img id="receipt-img-tag" src="" alt="Print" class="w-full rounded-xl border border-gray-700 max-h-[60vh] object-contain">
+        </div>
+    </div>
+
+    <script>
+        const packages = [
+            { id: 1, name: "Pacote Base 1.1", price: 7000, daily: 525, stock: "100 / 100", tag: "Popular" },
+            { id: 2, name: "Pacote Base 1.2", price: 10000, daily: 750, stock: "100 / 100", tag: "" },
+            { id: 3, name: "Pacote Base Intermédio", price: 20000, daily: 1500, stock: "100 / 100", tag: "Hot" },
+            { id: 4, name: "Pacote Avançado A", price: 35000, daily: 2625, stock: "100 / 100", tag: "" },
+            { id: 5, name: "Pacote Avançado B", price: 50000, daily: 3750, stock: "100 / 100", tag: "VIP" },
+            { id: 6, name: "Pacote Master Executivo", price: 80000, daily: 6000, stock: "100 / 100", tag: "" },
+            { id: 7, name: "Pacote Elite Pro", price: 120000, daily: 9000, stock: "100 / 100", tag: "Gold" },
+            { id: 8, name: "Pacote Supreme Plus", price: 180000, daily: 13500, stock: "100 / 100", tag: "" },
+            { id: 9, name: "Pacote Titan Diamante", price: 265000, daily: 19875, stock: "100 / 100", tag: "Máximo" }
+        ];
+
+        let isBalanceHidden = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSystemSettings();
+            checkSession();
+            renderPackages();
+        });
+
+        let clickCount = 0;
+        function secretAdminTrigger() {
+            clickCount++;
+            setTimeout(() => { clickCount = 0; }, 1000);
+            if(clickCount >= 3) {
+                clickCount = 0;
+                document.getElementById('admin-modal').classList.remove('hidden');
+            }
+        }
+
+        function loadSystemSettings() {
+            const settings = JSON.parse(localStorage.getItem('maz_settings') || '{"bank":"BAI","owner":"Money Az Lda","iban":"AO06 0000 0000 0000 0000 0","whatsapp":"244900000000"}');
+            
+            // Atualizar ecrã do cliente
+            document.getElementById('display-bank-name').innerText = settings.bank;
+            document.getElementById('display-bank-owner').innerText = settings.owner;
+            document.getElementById('display-bank-iban').innerText = settings.iban;
+            document.getElementById('whatsapp-support-link').href = `https://wa.me/${settings.whatsapp}`;
+
+            // Preencher campos do painel ADM
+            document.getElementById('cfg-bank').value = settings.bank;
+            document.getElementById('cfg-owner').value = settings.owner;
+            document.getElementById('cfg-iban').value = settings.iban;
+            document.getElementById('cfg-whatsapp').value = settings.whatsapp;
+        }
+
+        function saveSystemSettings(e) {
+            e.preventDefault();
+            const settings = {
+                bank: document.getElementById('cfg-bank').value,
+                owner: document.getElementById('cfg-owner').value,
+                iban: document.getElementById('cfg-iban').value,
+                whatsapp: document.getElementById('cfg-whatsapp').value
+            };
+            localStorage.setItem('maz_settings', JSON.stringify(settings));
+            loadSystemSettings();
+            Swal.fire('Guardado!', 'Coordenadas bancárias e WhatsApp atualizados com sucesso.', 'success');
+        }
+
+        function toggleBalanceVisibility() {
+            isBalanceHidden = !isBalanceHidden;
+            const eyeIcon = document.getElementById('balance-eye-icon');
+            eyeIcon.className = isBalanceHidden ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+            updateDashboard();
+        }
+
+        function copyIban() {
+            const iban = document.getElementById('display-bank-iban').innerText;
+            navigator.clipboard.writeText(iban);
+            Swal.fire({ toast: true, position: 'top', icon: 'success', title: 'IBAN copiado com sucesso!', showConfirmButton: false, timer: 1500 });
+        }
+
+        function checkSession() {
+            const activePhone = localStorage.getItem('maz_active_phone');
+            if(activePhone) {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                updateDashboard();
+                renderUserPackages();
+                renderUserHistory();
+            }
+        }
+
+        function switchTab(tab) {
+            if(tab === 'invest') {
+                document.getElementById('view-invest').classList.remove('hidden');
+                document.getElementById('view-mypackages').classList.add('hidden');
+                document.getElementById('tab-btn-invest').className = "py-2 text-xs font-bold rounded-xl bg-yellow-500 text-gray-900 transition shadow";
+                document.getElementById('tab-btn-mypackages').className = "py-2 text-xs font-bold rounded-xl text-gray-400 transition";
+            } else {
+                document.getElementById('view-invest').classList.add('hidden');
+                document.getElementById('view-mypackages').classList.remove('hidden');
+                document.getElementById('tab-btn-mypackages').className = "py-2 text-xs font-bold rounded-xl bg-yellow-500 text-gray-900 transition shadow";
+                document.getElementById('tab-btn-invest').className = "py-2 text-xs font-bold rounded-xl text-gray-400 transition";
+                renderUserPackages();
+                renderUserHistory();
+            }
+        }
+
+        function switchAuthTab(tab) {
+            if(tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('btn-tab-login').className = "flex-1 py-2 text-xs font-bold rounded-lg bg-yellow-500 text-gray-900 transition";
+                document.getElementById('btn-tab-register').className = "flex-1 py-2 text-xs font-bold rounded-lg text-gray-400 transition";
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+                document.getElementById('btn-tab-register').className = "flex-1 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white transition";
+                document.getElementById('btn-tab-login').className = "flex-1 py-2 text-xs font-bold rounded-lg text-gray-400 transition";
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+            const password = document.getElementById('reg-pass').value;
+
+            if(phone.length !== 9 || !phone.startsWith('9')) {
+                Swal.fire('Erro', 'Insira um número de telemóvel angolano válido (9 dígitos iniciado por 9).', 'error');
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('maz_users') || '{}');
+            if(users[phone]) {
+                Swal.fire('Erro', 'Este número de telemóvel já se encontra cadastrado.', 'error');
+                return;
+            }
+
+            users[phone] = { name, phone, password };
+            localStorage.setItem('maz_users', JSON.stringify(users));
+            localStorage.setItem('maz_active_phone', phone);
+
+            checkSession();
+            Swal.fire('Sucesso!', 'Conta criada com sucesso!', 'success');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const phone = document.getElementById('login-phone').value;
+            const password = document.getElementById('login-pass').value;
+
+            let users = JSON.parse(localStorage.getItem('maz_users') || '{}');
+            const user = users[phone];
+
+            if(!user || user.password !== password) {
+                Swal.fire('Erro de Acesso', 'Número de telemóvel ou senha incorretos.', 'error');
+                return;
+            }
+
+            localStorage.setItem('maz_active_phone', phone);
+            checkSession();
+        }
+
+        function logout() {
+            localStorage.removeItem('maz_active_phone');
+            location.reload();
+        }
+
+        function renderPackages() {
+            const container = document.getElementById('packages-list');
+            container.innerHTML = "";
+            packages.forEach(p => {
+                const profit15 = p.daily * 15;
+                const profit30 = p.daily * 30;
+
+                container.innerHTML += `
+                    <div class="bg-card-app border border-gray-800 p-4 rounded-2xl shadow-lg space-y-3 relative">
+                        ${p.tag ? `<span class="absolute right-4 top-4 bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">${p.tag}</span>` : ''}
+                        <div>
+                            <h3 class="font-bold text-base text-white">${p.name}</h3>
+                            <div class="inline-block bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-[11px] font-semibold px-2.5 py-1 rounded-lg my-1.5">
+                                Rendimento: 7,5% ao dia (${p.daily.toLocaleString()} Kz/dia)
+                            </div>
+                            <div class="text-2xl font-black text-yellow-400">${p.price.toLocaleString()} Kz</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 bg-dark-app p-2.5 rounded-xl border border-gray-800 text-[11px]">
+                            <div>
+                                <span class="text-gray-400 block">Lucro em 15 Dias:</span>
+                                <span class="text-emerald-400 font-bold">+${profit15.toLocaleString()} Kz</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 block">Lucro em 30 Dias:</span>
+                                <span class="text-yellow-400 font-bold">+${profit30.toLocaleString()} Kz</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center text-[11px] text-gray-400 pt-1 border-t border-gray-800/80">
+                            <span>Unidades restantes:</span>
+                            <span class="text-white font-bold">${p.stock}</span>
+                        </div>
+                        <button onclick="buyPackage(${p.price}, '${p.name}', ${p.daily})" class="w-full bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-extrabold py-2.5 rounded-xl text-xs transition shadow flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-cart-shopping"></i><span>Comprar com Saldo</span>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function buyPackage(price, name, daily) {
+            const activePhone = localStorage.getItem('maz_active_phone');
+            let balances = JSON.parse(localStorage.getItem('maz_balances') || '{}');
+            const current = balances[activePhone] || 0;
+
+            if(current < price) {
+                Swal.fire('Saldo Insuficiente', 'Não tem saldo suficiente na carteira para comprar este pacote. Faça uma recarga.', 'warning');
+                return;
+            }
+
+            balances[activePhone] = current - price;
+            localStorage.setItem('maz_balances', JSON.stringify(balances));
+
+            let myPackages = JSON.parse(localStorage.getItem('maz_my_packages') || '[]');
+            myPackages.push({
+                id: Date.now(),
+                phone: activePhone,
+                name,
+                price,
+                daily,
+                status: 'Pendente',
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('maz_my_packages', JSON.stringify(myPackages));
+
+            updateDashboard();
+            renderUserPackages();
+            renderUserHistory();
+            Swal.fire('Solicitado!', `Comprou o pacote "${name}". O administrador irá verificar e ativar em breve.`, 'success');
+        }
+
+        function renderUserPackages() {
+            const activePhone = localStorage.getItem('maz_active_phone');
+            const container = document.getElementById('my-packages-container');
+            const myPackages = JSON.parse(localStorage.getItem('maz_my_packages') || '[]');
+            const userP = myPackages.filter(p => p.phone === activePhone);
+
+            container.innerHTML = userP.length === 0 ? '<p class="text-xs text-gray-400 text-center py-4">Ainda não comprou nenhum pacote.</p>' : '';
+
+            userP.forEach(p => {
+                let badgeColor = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+                if(p.status === 'Ativo') badgeColor = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+                if(p.status === 'Rejeitado') badgeColor = 'bg-red-500/20 text-red-400 border-red-500/30';
+
+                container.innerHTML += `
+                    <div class="bg-card-app border border-gray-800 p-4 rounded-2xl shadow space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-sm text-white">${p.name}</h4>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}">${p.status}</span>
+                        </div>
+                        <div class="text-xs text-gray-400 flex justify-between">
+                            <span>Preço: <b class="text-white">${p.price.toLocaleString()} Kz</b></span>
+                            <span>Rendimento: <b class="text-emerald-400">+${p.daily.toLocaleString()} Kz/dia</b></span>
+                        </div>
+                        <div class="text-[10px] text-gray-500 pt-1 border-t border-gray-800">
+                            Data da compra: ${p.date}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderUserHistory() {
+            const activePhone = localStorage.getItem('maz_active_phone');
+            const container = document.getElementById('user-history-container');
+            const orders = JSON.parse(localStorage.getItem('maz_orders') || '[]').filter(o => o.phone === activePhone);
+            const withdraws = JSON.parse(localStorage.getItem('maz_withdraws') || '[]').filter(w => w.phone === activePhone);
+
+            const allEvents = [
+                ...orders.map(o => ({ type: 'Recarga', amount: o.amount, status: o.status, date: o.date })),
+                ...withdraws.map(w => ({ type: 'Levantamento', amount: w.amount, status: w.status, date: w.date }))
+            ];
+
+            container.innerHTML = allEvents.length === 0 ? '<p class="text-gray-400 text-center py-2">Sem histórico recente.</p>' : '';
+
+            allEvents.forEach(e => {
+                const color = e.type === 'Recarga' ? 'text-emerald-400' : 'text-red-400';
+                container.innerHTML += `
+                    <div class="bg-dark-app p-2.5 rounded-xl border border-gray-800 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-white block">${e.type}</span>
+                            <span class="text-[10px] text-gray-500">${e.date}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="${color} font-bold block">${e.type === 'Recarga' ? '+' : '-'}${e.amount.toLocaleString()} Kz</span>
+                            <span class="text-[10px] text-yellow-400">${e.status}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateDashboard() {
+            const activePhone = localStorage.getItem('maz_active_phone');
+            const users = JSON.parse(localStorage.getItem('maz_users') || '{}');
+            const user = users[activePhone] || { name: "Investidor" };
+
+            document.getElementById('user-welcome-name').innerText = user.name;
+
+            const balances = JSON.parse(localStorage.getItem('maz_balances') || '{}');
+            const pendings = JSON.parse(localStorage.getItem('maz_pendings') || '{}');
+            
+            const realBal = (balances[activePhone] || 0).toLocaleString() + " Kz";
+            const realPend = (pendings[activePhone] || 0).toLocaleString() + " Kz";
+
+            document.getElementById('user-balance-display').innerText = isBalanceHidden ? "•••••• Kz" : realBal;
+            document.getElementById('user-pending-display').innerText = isBalanceHidden ? "•••• Kz" : realPend;
+        }
+
+        function copyRefLink() {
+            const activePhone = localStorage.getItem('maz_active_phone');
+            const link = `https://edygutxi-star.github.io/?ref=${activePhone}`;
+            navigator.clipboard.writeText(link);
+            Swal.fire({ toast: true, position: 'top', icon: 'success', title: 'Link de convite copiado!', showConfirmButton: false, timer: 1500 });
+        }
+
+        function openDepositModal() { document.getElementById('deposit-modal').classList.remove('hidden'); }
+        function closeDepositModal() { 
+            document.getElementById('deposit-modal').classList.add('hidden'); 
+            document.getElementById('dep-amount').value = "";
+        }
+
+        function submitDeposit(e) {
+            e.preventDefault();
+            const activePhone = localStorage.getItem('maz_active_phone');
+            const users = JSON.parse(localStorage.getItem('maz_users') || '{}');
+            const user = users[activePhone];
+            const amount = parseFloat(document.getElementById('dep-amount').value);
+            const file = document.getElementById('dep-receipt').files[0];
+
+            if(!amount || amount <= 0) {
+                Swal.fire('Erro', 'Insira um valor de recarga válido.', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function() {
+                let orders = JSON.parse(localStorage.getItem('maz_orders') || '[]');
+                orders.push({ 
+                    id: Date.now(), 
+                    name: user.name, 
+                    phone: activePhone, 
+                    amount: amount, 
+                    receipt: reader.result, 
+                    status: 'Pendente', 
+                    date: new Date().toLocaleDateString() 
+                });
+                localStorage.setItem('maz_orders', JSON.stringify(orders));
+
+                closeDepositModal();
+                renderUserHistory();
+                Swal.fire('Sucesso!', `Comprovante de ${amount.toLocaleString()} Kz enviado. O administrador irá verificar e aprovar.`, 'success');
+            }
+        }
+
+        function openWithdrawModal() { document.getElementById('withdraw-modal').classList.remove('hidden'); }
+        function closeWithdrawModal() { document.getElementById('withdraw-modal').classList.add('hidden'); }
+
+        function submitWithdraw(e) {
+            e.preventDefault();
+            const activePhone = localStorage.getItem('maz_active_phone');
+            const amount = parseFloat(document.getElementById('w-amount').value);
+            const iban = document.getElementById('w-iban').value;
+
+            let balances = JSON.parse(localStorage.getItem('maz_balances') || '{}');
+            const current = balances[activePhone] || 0;
+
+            if(amount > current) {
+                Swal.fire('Erro', 'O valor solicitado excede o seu saldo disponível.', 'error');
+                return;
+            }
+
+            balances[activePhone] = current - amount;
+            localStorage.setItem('maz_balances', JSON.stringify(balances));
+
+            let withdraws = JSON.parse(localStorage.getItem('maz_withdraws') || '[]');
+            withdraws.push({ id: Date.now(), phone: activePhone, amount, iban, status: 'Pendente', date: new Date().toLocaleDateString() });
+            localStorage.setItem('maz_withdraws', JSON.stringify(withdraws));
+
+            closeWithdrawModal();
+            Swal.fire('Solicitado', 'Pedido de levantamento enviado com sucesso!', 'success');
+            updateDashboard();
+            renderUserHistory();
+        }
+
+        function closeAdminModal() { 
+            document.getElementById('admin-modal').classList.add('hidden');
+            document.getElementById('admin-login-box').classList.remove('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('admin-pass').value = "";
+        }
+
+        function verifyAdmin() {
+            if(document.getElementById('admin-pass').value === '22206aa') {
+                document.getElementById('admin-login-box').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadAdminData();
+            } else {
+                Swal.fire('Erro', 'Senha incorreta!', 'error');
+            }
+        }
+
+        function loadAdminData() {
+            const users = JSON.parse(localStorage.getItem('maz_users') || '{}');
+            const balances = JSON.parse(localStorage.getItem('maz_balances') || '{}');
+            const orders = JSON.parse(localStorage.getItem('maz_orders') || '[]');
+            const myPackages = JSON.parse(localStorage.getItem('maz_my_packages') || '[]');
+            const withdraws = JSON.parse(localStorage.getItem('maz_withdraws') || '[]');
+
+            const userKeys = Object.keys(users);
+            document.getElementById('adm-stat-users').innerText = userKeys.length;
+            const totalB = Object.values(balances).reduce((a, b) => a + b, 0);
+            document.getElementById('adm-stat-totalbalance').innerText = totalB.toLocaleString() + " Kz";
+            document.getElementById('adm-stat-pending').innerText = orders.length + withdraws.length;
+
+            const ordersDiv = document.getElementById('admin-orders-list');
+            ordersDiv.innerHTML = orders.length === 0 ? '<p class="text-gray-400">Sem recargas pendentes.</p>' : '';
+            orders.forEach(o => {
+                ordersDiv.innerHTML += `
+                    <div class="bg-dark-app p-3 rounded-xl border border-gray-700 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-white">${o.name} (${o.phone})</p>
+                                <p class="text-xs text-yellow-400 font-bold">Valor: ${o.amount.toLocaleString()} Kz</p>
+                            </div>
+                            <button onclick="viewReceipt('${o.receipt}')" class="text-yellow-400 underline text-[10px]">Ver Print</button>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="approveOrder(${o.id})" class="flex-1 bg-emerald-600 text-white py-1 rounded-lg font-bold text-xs">Aprovar ${o.amount.toLocaleString()} Kz</button>
+                            <button onclick="rejectOrder(${o.id})" class="bg-red-600 text-white px-3 py-1 rounded-lg font-bold text-xs">Recusar</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const pkgDiv = document.getElementById('admin-packages-list');
+            pkgDiv.innerHTML = myPackages.length === 0 ? '<p class="text-gray-400">Sem pacotes pendentes.</p>' : '';
+            myPackages.forEach(p => {
+                pkgDiv.innerHTML += `
+                    <div class="bg-dark-app p-3 rounded-xl border border-gray-700 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-white">${p.name} (${p.price.toLocaleString()} Kz)</p>
+                                <p class="text-[10px] text-gray-400">Tel: ${p.phone} | Status: <b class="text-yellow-400">${p.status}</b></p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="updatePackageStatus(${p.id}, 'Ativo')" class="flex-1 bg-emerald-600 text-white py-1 rounded font-bold text-[11px]">Ativar</button>
+                            <button onclick="updatePackageStatus(${p.id}, 'Rejeitado')" class="flex-1 bg-red-600 text-white py-1 rounded font-bold text-[11px]">Rejeitar</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const wDiv = document.getElementById('admin-withdraws-list');
+            wDiv.innerHTML = withdraws.length === 0 ? '<p class="text-gray-400">Sem saques pendentes.</p>' : '';
+            withdraws.forEach(w => {
+                wDiv.innerHTML += `
+                    <div class="bg-dark-app p-3 rounded-xl border border-gray-700 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-white">Tel: ${w.phone}</p>
+                            <p class="text-yellow-400 font-semibold">${w.amount.toLocaleString()} Kz</p>
+                            <p class="text-[10px] text-gray-400">IBAN: ${w.iban}</p>
+                        </div>
+                        <button onclick="approveWithdraw(${w.id})" class="bg-emerald-600 text-white px-3 py-1 rounded-lg font-bold text-xs">Pagar</button>
+                    </div>
+                `;
+            });
+
+            const uDiv = document.getElementById('admin-users-list');
+            uDiv.innerHTML = userKeys.length === 0 ? '<p class="text-gray-400">Nenhum utilizador registado.</p>' : '';
+            userKeys.forEach(phone => {
+                const u = users[phone];
+                const userBal = balances[phone] || 0;
+                uDiv.innerHTML += `
+                    <div class="bg-dark-app p-2.5 rounded-xl border border-gray-700 flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-white text-xs">${u.name}</p>
+                            <p class="text-[10px] text-gray-400">Tel: ${phone} | Saldo: <b class="text-emerald-400">${userBal.toLocaleString()} Kz</b></p>
+                        </div>
+                        <button onclick="editUserBalance('${phone}', ${userBal})" class="bg-yellow-500 hover:bg-yellow-400 text-gray-900 px-2 py-1 rounded font-bold text-[10px]">Ajustar Saldo</button>
+                    </div>
+                `;
+            });
+        }
+
+        function editUserBalance(phone, currentBal) {
+            Swal.fire({
+                title: 'Ajustar Saldo',
+                text: `Introduza o novo saldo para o utilizador (${phone}):`,
+                input: 'number',
+                inputValue: currentBal,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                cancelButtonText: 'Cancelar'
+            }).then((res) => {
+                if(res.isConfirmed && res.value !== null && res.value !== '') {
+                    let balances = JSON.parse(localStorage.getItem('maz_balances') || '{}');
+                    balances[phone] = parseFloat(res.value);
+                    localStorage.setItem('maz_balances', JSON.stringify(balances));
+                    loadAdminData();
+                    updateDashboard();
+                    Swal.fire('Atualizado!', 'O saldo foi modificado com sucesso.', 'success');
+                }
+            });
+        }
+
+        function rejectOrder(id) {
+            let orders = JSON.parse(localStorage.getItem('maz_orders') || '[]');
+            orders = orders.filter(o => o.id !== id);
+            localStorage.setItem('maz_orders', JSON.stringify(orders));
+            loadAdminData();
+            Swal.fire('Recusado', 'A recarga foi removida da lista.', 'info');
+        }
+
+        function updatePackageStatus(id, newStatus) {
+            let myPackages = JSON.parse(localStorage.getItem('maz_my_packages') || '[]');
+            const pkg = myPackages.find(p => p.id === id);
+            if(pkg) {
+                pkg.status = newStatus;
+                localStorage.setItem('maz_my_packages', JSON.stringify(myPackages));
+                loadAdminData();
+                Swal.fire('Atualizado', `Pacote marcado como ${newStatus}.`, 'success');
+            }
+        }
+
+        function viewReceipt(data) {
+            document.getElementById('receipt-img-tag').src = data;
+            document.getElementById('receipt-view-modal').classList.remove('hidden');
+        }
+        function closeReceiptView() { document.getElementById('receipt-view-modal').classList.add('hidden'); }
+
+        function approveOrder(id) {
+            let orders = JSON.parse(localStorage.getItem('maz_orders') || '[]');
+            const order = orders.find(o => o.id === id);
+            if(order) {
+                orders = orders.filter(o => o.id !== id);
+                localStorage.setItem('maz_orders', JSON.stringify(orders));
+
+                let balances = JSON.parse(localStorage.getItem('maz_balances') || '{}');
+                balances[order.phone] = (balances[order.phone] || 0) + order.amount;
+                localStorage.setItem('maz_balances', JSON.stringify(balances));
+
+                loadAdminData();
+                updateDashboard();
+                Swal.fire('Aprovado!', `${order.amount.toLocaleString()} Kz creditados com sucesso na conta do cliente!`, 'success');
+            }
+        }
+
+        function approveWithdraw(id) {
+            let withdraws = JSON.parse(localStorage.getItem('maz_withdraws') || '[]');
+            withdraws = withdraws.filter(w => w.id !== id);
+            localStorage.setItem('maz_withdraws', JSON.stringify(withdraws));
+            loadAdminData();
+            Swal.fire('Sucesso', 'Saque marcado como processado.', 'success');
+        }
+    </script>
+</body>
+</html>
